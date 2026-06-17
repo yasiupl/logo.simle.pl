@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Download, Trash2, Eraser, Palette, MousePointer2, Plus, Link, Eye, Star, Hexagon } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Trash2, Eraser, Palette, MousePointer2, Plus, Link, Eye, Star, Hexagon } from 'lucide-react';
 
 // Wyodrębnione ścieżki wektorowe szarego napisu SimLE z podanego pliku SVG
 const simleTextPaths = [
@@ -15,11 +15,11 @@ const simleTextPaths = [
 ];
 
 const SimLELogoCreator = () => {
-  const [selectedColor, setSelectedColor] = useState('#F58220'); // Domyślny pomarańczowy
+  const [selectedColor, setSelectedColor] = useState<string | null>('#F58220'); // Domyślny pomarańczowy
   const [toastMessage, setToastMessage] = useState('');
   
   // Wczytywanie stanu rysunku z URL (Base64) lub w ostateczności z pamięci przeglądarki
-  const [paintedTriangles, setPaintedTriangles] = useState(() => {
+  const [paintedTriangles, setPaintedTriangles] = useState<Record<string, string>>(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const dataParam = urlParams.get('d');
@@ -37,7 +37,7 @@ const SimLELogoCreator = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   
   // Wczytywanie własnych kolorów z URL (Base64) lub w ostateczności z pamięci przeglądarki
-  const [customColors, setCustomColors] = useState(() => {
+  const [customColors, setCustomColors] = useState<string[]>(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const dataParam = urlParams.get('d');
@@ -138,7 +138,7 @@ const SimLELogoCreator = () => {
 
         // Funkcja formatująca punkty do stałej dokładności - niezbędne dla
         // perfekcyjnego łączenia wierzchołków i usuwania problemów z precyzją JS
-        const pt = (px, py) => `${px.toFixed(3)},${py.toFixed(3)}`;
+        const pt = (px: number , py: number) => `${px.toFixed(3)},${py.toFixed(3)}`;
 
         // Jeśli (r + c) jest parzyste -> trójkąt skierowany w górę
         if ((r + c) % 2 === 0) {
@@ -169,7 +169,7 @@ const SimLELogoCreator = () => {
     return () => window.removeEventListener('mouseup', handleMouseUp);
   }, []);
 
-  const handleTriangleInteraction = useCallback((id) => {
+  const handleTriangleInteraction = useCallback((id: string) => {
     setPaintedTriangles(prev => {
       // Jeśli wybrany kolor to "gumka" (null), usuwamy wpis
       if (selectedColor === null) {
@@ -234,7 +234,7 @@ const SimLELogoCreator = () => {
     const vHeight = (maxY - minY) + paddingY * 2;
 
     // --- ŁĄCZENIE TRÓJKĄTÓW W JEDNOLITE ŚCIEŻKI SVG (UNION PATHS) ---
-    const colorGroups = {};
+    const colorGroups: Record<string, any[]> = {};
     paintedShapes.forEach(t => {
       const color = paintedTriangles[t.id];
       if (!colorGroups[color]) colorGroups[color] = [];
@@ -269,7 +269,9 @@ const SimLELogoCreator = () => {
       let colorPaths = '';
       while (edges.size > 0) {
         // Bierzemy pierwszą dowolną krawędź ze stosu jako start
-        const [firstKey, firstEdge] = edges.entries().next().value;
+        const entry = edges.entries().next().value;
+        if (!entry) continue; // Przerwij pętlę, jeśli mapa jest pusta
+        const [firstKey, firstEdge] = entry;
         edges.delete(firstKey);
 
         let currentPath = `M ${firstEdge.from.replace(',', ' ')} L ${firstEdge.to.replace(',', ' ')}`;
@@ -420,7 +422,7 @@ const SimLELogoCreator = () => {
               fontSize={actualFontSize}
               fontWeight="500"
               fill={primaryColor}
-              textTransform="uppercase"
+              style={{ textTransform: 'uppercase' }}
               letterSpacing="0.05em"
             >
               {projectName.toUpperCase()}
