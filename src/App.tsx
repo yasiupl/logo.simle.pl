@@ -408,6 +408,13 @@ const SimLELogoCreator = () => {
     const sygnetWidth = maxX - minX;
     const sygnetHeight = maxY - minY;
 
+    // Odstępy bazujące na siatce trójkątów
+    const triangleSide = 40;
+    const triangleH = triangleSide * Math.sqrt(3) / 2;
+    const marginX = triangleSide * 2;
+    const marginY = triangleH * 2;
+    const innerGap = triangleSide; // Odstęp między sygnetem a tekstem
+
     // Wysokość bloku tekstowego: samo SimLE to ~56px.
     const simleHeight = 56;
     
@@ -422,13 +429,8 @@ const SimLELogoCreator = () => {
     // Czysta wysokość całego bloku (bez ukrytych marginesów z dołu czcionki)
     const textBlockHeight = projectName.trim() ? (simleHeight + projectSpacing + visualTextHeight) : simleHeight;
     
-    // Obliczamy skale dla narysowanego sygnetu, aby jego wysokość odpowiadała całkowitej wysokości bloku napisów
-    const scale = textBlockHeight / sygnetHeight;
-    const scaledSygnetWidth = sygnetWidth * scale;
-    
-    // Odstęp sygnetu od napisu: "jedna jednostka trójkąta" (podstawa trójkąta w nowej skali)
-    const triangleBase = 40; 
-    const gap = triangleBase * scale;
+    // Obliczamy skale dla loga tekstowego, aby jego wysokość odpowiadała całkowitej wysokości sygnetu
+    const textScale = sygnetHeight / textBlockHeight;
 
     let exactTextWidth = Math.max(300, projectName.length * (actualFontSize * 1.1));
     let textRender = null;
@@ -442,6 +444,11 @@ const SimLELogoCreator = () => {
         const letterSpacePx = actualFontSize * 0.05;
         
         try {
+          // Pobranie obwiedni pierwszej litery, by usunąć wewnętrzny margines (left side bearing)
+          const firstGlyph = font.charToGlyph(textToRender[0]);
+          const firstPathBBox = firstGlyph.getPath(0, 0, actualFontSize).getBoundingBox();
+          currentX = -(firstPathBBox.x1 || 0);
+
           for (let i = 0; i < textToRender.length; i++) {
             const char = textToRender[i];
             const glyph = font.charToGlyph(char);
@@ -462,7 +469,7 @@ const SimLELogoCreator = () => {
       if (!textRender) {
         textRender = (
           <text
-            x="0"
+            x={-actualFontSize * 0.04} // Mała korekta dla fallbacku tekstowego
             y={simleHeight + projectSpacing + visualTextHeight}
             fontFamily="'Science Gothic', sans-serif"
             fontSize={actualFontSize}
@@ -476,47 +483,55 @@ const SimLELogoCreator = () => {
         );
       }
     }
-
-    const totalWidth = gap * 2 + scaledSygnetWidth + gap + exactTextWidth + gap * 3;
+    
+    const scaledTextWidth = exactTextWidth * textScale;
 
     const sygnet = (
-      <g transform={`scale(${scale}) translate(${gap * 4 - minX}, ${-minY})`}>
-          {paintedShapes.map(t => (
-            <polygon 
-              key={`viz-${t.id}`} 
-              points={t.points} 
-              fill={paintedTriangles[t.id]} 
-              stroke={paintedTriangles[t.id]} 
-              strokeWidth="1" 
-            />
-          ))}
-        </g>
+      <g transform={`translate(${marginX}, ${marginY})`}>
+          <g transform={`translate(${-minX}, ${-minY})`}>
+              {paintedShapes.map(t => (
+                <polygon 
+                  key={`viz-${t.id}`} 
+                  points={t.points} 
+                  fill={paintedTriangles[t.id]} 
+                  stroke={paintedTriangles[t.id]} 
+                  strokeWidth="1" 
+                />
+              ))}
+          </g>
+      </g>
     );
 
     const logo = (
-        <g transform={`translate(${gap * 4 + scaledSygnetWidth}, 0)`}>
-          <g transform="translate(-505.8, -371.9)">
-            <g transform="matrix(1.3333333,0,0,-1.3333333,0,793.70667)">
-              {simleTextPaths.map((pathObj, idx) => (
-                <g key={`simle-path-${idx}`} transform={pathObj.transform}>
-                  <path d={pathObj.d} fill="#70706f" fillRule="nonzero" />
+        <g transform={`translate(${marginX + sygnetWidth + innerGap}, ${marginY})`}>
+            <g transform={`scale(${textScale})`}>
+                <g transform="translate(-505.8, -371.9)">
+                  <g transform="matrix(1.3333333,0,0,-1.3333333,0,793.70667)">
+                    {simleTextPaths.map((pathObj, idx) => (
+                      <g key={`simle-path-${idx}`} transform={pathObj.transform}>
+                        <path d={pathObj.d} fill="#70706f" fillRule="nonzero" />
+                      </g>
+                    ))}
+                  </g>
                 </g>
-              ))}
+                {textRender}
             </g>
-          </g>
-          {textRender}
         </g>
     );
+    
+    const sygnetTotalWidth = sygnetWidth + marginX * 2;
+    const sygnetTotalHeight = sygnetHeight + marginY * 2;
+    const logoTotalWidth = marginX + sygnetWidth + innerGap + scaledTextWidth + marginX;
+    // Wysokość jest zdeterminowana przez sygnet, ponieważ tekst jest do niego skalowany
+    const logoTotalHeight = sygnetHeight + marginY * 2;
 
     if (type === 'logo') {
       return (
         <svg
-          viewBox={`0 0 ${totalWidth} ${textBlockHeight}`}
+          viewBox={`0 0 ${logoTotalWidth} ${logoTotalHeight}`}
           className="w-auto max-w-full drop-shadow-sm h-full max-h-32"
         >
-          {/* Narysowany Sygnet z wyrównaniem do 0,0 i nałożoną skalą */}
           {sygnet}
-          {/* Blok z Logotypem i Nazwą Projektu */}
           {logo}
         </svg>
       );
@@ -524,9 +539,8 @@ const SimLELogoCreator = () => {
     else if (type === 'sygnet') {
       return (
         <svg
-          viewBox={`0 0 ${sygnetWidth} ${sygnetHeight}`}
+          viewBox={`0 0 ${sygnetTotalWidth} ${sygnetTotalHeight}`}
         >
-          {/* Narysowany Sygnet z wyrównaniem do 0,0 i nałożoną skalą */}
           {sygnet}
         </svg>
       );  
@@ -769,11 +783,13 @@ const SimLELogoCreator = () => {
               {gridConfig.triangles.map((triangle) => {
                 const isPainted = paintedTriangles[triangle.id] !== undefined;
                 const fillColor = isPainted ? paintedTriangles[triangle.id] : 'transparent';
+                const strokeColor = isPainted ? paintedTriangles[triangle.id] : '#E5E7EB';
                 return (
                   <polygon
                     key={triangle.id}
                     points={triangle.points}
                     fill={fillColor}
+                    stroke={strokeColor}
                     strokeWidth={isPainted ? "1" : "0.5"}
                     className="transition-colors duration-75"
                     onMouseDown={(e) => {
