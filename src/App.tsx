@@ -724,12 +724,17 @@ const SimLELogoCreator = () => {
           <div>
             <h1 className="text-2xl font-bold tracking-wider flex items-center gap-2">
               <Palette className="w-6 h-6 text-[#D4CA05]" />
-              Kreator Logo / Sygnetu
+              Kreator Logo Projektu SimLE
             </h1>
             <p className="text-gray-300 text-sm mt-1 max-w-xl">
               Zaznaczaj trójkąty na siatce, aby stworzyć dynamiczną kompozycję
-              inspirowaną ciągiem Fibonacciego i geometrią, zgodnie z księgą
-              znaku.
+              inspirowaną ciągiem Fibonacciego i geometrią, zgodnie z <a 
+                className="underline"
+                href="/SimLE - księga znaku.pdf" 
+                target="_blank"
+              >
+                 księgą znaku
+              </a>.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
@@ -938,11 +943,12 @@ const SimLELogoCreator = () => {
           </aside>
 
           {/* Obszar Roboczy */}
-          <section className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-center p-4">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+          <section className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-center p-4 h-fit">
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
               Obszar roboczy
             </h2>
-            <div className="overflow-auto max-w-full max-h-full">
+            <p className="mb-6">Narysuj sygnet twojego projektu poniżej.</p>
+            <div className="overflow-auto max-w-full max-h-full justify-center">
               <svg
                 id="logo-canvas"
                 width={gridConfig.width}
