@@ -410,28 +410,28 @@ const SimLELogoCreator = () => {
         }
       }
       
-      // if (!textRender) {
-      //   textRender = (
-      //     <text
-      //       x="0"
-      //       y={simleHeight + projectSpacing + visualTextHeight}
-      //       fontFamily="'Science Gothic', sans-serif"
-      //       fontSize={actualFontSize}
-      //       fontWeight="500"
-      //       fill={primaryColor}
-      //       style={{ textTransform: 'uppercase' }}
-      //       letterSpacing="0.05em"
-      //     >
-      //       {textToRender}
-      //     </text>
-      //   );
-      // }
+      if (!textRender) {
+        textRender = (
+          <text
+            x="0"
+            y={simleHeight + projectSpacing + visualTextHeight}
+            fontFamily="'Science Gothic', sans-serif"
+            fontSize={actualFontSize}
+            fontWeight="500"
+            fill={primaryColor}
+            style={{ textTransform: 'uppercase' }}
+            letterSpacing="0.05em"
+          >
+            {textToRender}
+          </text>
+        );
+      }
     }
 
-    const totalWidth = scaledSygnetWidth + gap + exactTextWidth + 20;
+    const totalWidth = gap * 2 + scaledSygnetWidth + gap + exactTextWidth + gap * 3;
 
     const sygnet = (
-      <g transform={`scale(${scale}) translate(${-minX}, ${-minY})`}>
+      <g transform={`scale(${scale}) translate(${gap * 4 - minX}, ${-minY})`}>
           {paintedShapes.map(t => (
             <polygon 
               key={`viz-${t.id}`} 
@@ -445,7 +445,7 @@ const SimLELogoCreator = () => {
     );
 
     const logo = (
-        <g transform={`translate(${scaledSygnetWidth + gap}, 0)`}>
+        <g transform={`translate(${gap * 4 + scaledSygnetWidth}, 0)`}>
           <g transform="translate(-505.8, -371.9)">
             <g transform="matrix(1.3333333,0,0,-1.3333333,0,793.70667)">
               {simleTextPaths.map((pathObj, idx) => (
@@ -474,7 +474,7 @@ const SimLELogoCreator = () => {
     else if (type === 'sygnet') {
       return (
         <svg
-          viewBox={`0 0 ${totalWidth} ${textBlockHeight}`}
+          viewBox={`0 0 ${sygnetWidth} ${sygnetHeight}`}
         >
           {/* Narysowany Sygnet z wyrównaniem do 0,0 i nałożoną skalą */}
           {sygnet}
