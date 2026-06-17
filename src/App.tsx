@@ -572,14 +572,14 @@ const SimLELogoCreator = () => {
     const triangleH = (triangleSide * Math.sqrt(3)) / 2;
     const marginX = triangleSide * 2;
     const marginY = triangleH * 2;
-    const innerGap = triangleSide; // Odstęp między sygnetem a tekstem
+    const innerGap = triangleSide * 2; // Odstęp między sygnetem a tekstem
 
     // Wysokość bloku tekstowego: samo SimLE to ~56px.
     const simleHeight = 56;
 
     // Zdefiniowanie wizualnej wysokości liter (60% wysokości SimLE) oraz odstępu (30%)
     const visualTextHeight = simleHeight * 0.6;
-    const projectSpacing = simleHeight * 0.3;
+    const projectSpacing = simleHeight * 0.2;
 
     // Rekompensata wbudowanego marginesu czcionki (wielkie litery zajmują ok. ~73% całkowitego rozmiaru w tej czcionce)
     const capHeightRatio = 0.73;
