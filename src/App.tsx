@@ -1062,7 +1062,7 @@ const SimLELogoCreator = () => {
             </a>
             .{" "}
             <a href="https://github.com/yasiupl/logo.simle.pl" target="_blank">
-              See Source Code
+              Kod źródłowy na GitHubie
             </a>
             .
           </p>
