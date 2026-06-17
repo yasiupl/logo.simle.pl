@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Trash2, Eraser, Palette, MousePointer2, Plus, Link, Eye, Star, Hexagon, Component } from 'lucide-react';
+import { Trash2, Eraser, Palette, Type, MousePointer2, Plus, Link, Eye, Star, Hexagon, Component } from 'lucide-react';
 import { HexColorPicker } from "react-colorful";
 
 // Wyodrębnione ścieżki wektorowe szarego napisu SimLE z podanego pliku SVG
@@ -17,7 +17,9 @@ const simleTextPaths = [
 
 const SimLELogoCreator = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>('#F58220');
+  const [tempColor, setTempColor] = useState('#000000');
   const [showPicker, setShowPicker] = useState(false);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [font, setFont] = useState<any>(null);
   
@@ -55,7 +57,11 @@ const SimLELogoCreator = () => {
     }
   });
   
-  const [tempColor, setTempColor] = useState('#000000');
+  const removeCustomColor = (colorToRemove: string) => {
+    setCustomColors(prev => prev.filter(c => c !== colorToRemove));
+    // Jeśli usuwamy aktualnie wybrany kolor, zresetuj go
+    if (selectedColor === colorToRemove) setSelectedColor('#F58220');
+  };
 
   // Wczytywanie nazwy projektu
   const [projectName, setProjectName] = useState(() => {
@@ -155,16 +161,13 @@ const SimLELogoCreator = () => {
 
   // Paleta barw
   const colors = [
-    { name: 'Pomarańczowy (Główny)', value: '#F58220' },
-    { name: 'Granatowy (Główny)', value: '#163A5F' },
-    { name: 'Ciemny Granat', value: '#0B1D30' },
-    { name: 'Jasny Niebieski', value: '#4BB7E6' },
     { name: 'Oliwkowy', value: '#D4CA05' }, 
     { name: 'Ciemnozielony', value: '#3B6329' }, 
     { name: 'Morski', value: '#2B7A87' }, 
     { name: 'Ciemny Morski', value: '#062D34' },
     { name: 'Szary (Podany)', value: '#D4D3D3' }, 
     { name: 'Ciemny Szary', value: '#58595B' },
+    { name: 'Czarny', value: '#000000' },
     { name: 'Biały', value: '#FFFFFF' }
   ];
 
@@ -504,14 +507,6 @@ const SimLELogoCreator = () => {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <input
-              type="text"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              placeholder="Nazwa projektu"
-              className="bg-white/10 border border-white/20 text-white placeholder-white/50 px-3 py-2 rounded-md text-sm focus:outline-none focus:border-[#D4CA05] focus:bg-white/20 transition-colors w-full sm:w-40"
-              title="Nazwa projektu"
-            />
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={clearCanvas}
@@ -551,6 +546,20 @@ const SimLELogoCreator = () => {
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Narzędzia</h2>
             <div className="mb-6">
               <h3 className="text-md font-semibold mb-3 flex items-center gap-2">
+                <Type className="w-4 h-4 text-[#062D34]" />
+                Nazwa projektu
+              </h3>
+              <input
+                type="text"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                placeholder="Nazwa projektu"
+                className="border px-3 py-2 rounded-md text-sm focus:outline-none focus:border-[#D4CA05] transition-colors w-full"
+                title="Nazwa projektu"
+              />
+            </div>
+            <div className="mb-6">
+              <h3 className="text-md font-semibold mb-3 flex items-center gap-2">
                 <MousePointer2 className="w-4 h-4 text-[#062D34]" />
                 Akcja
               </h3>
@@ -570,54 +579,77 @@ const SimLELogoCreator = () => {
             <div>
               <h3 className="text-md font-semibold mb-3 flex items-center gap-2">
                 <Palette className="w-4 h-4 text-[#062D34]" />
-                Paleta kolorów
+                Paleta kolorów SimLE
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 {colors.map((color) => (
                   <button
-                  key={color.value}
-                  onClick={() => setSelectedColor(color.value)}
-                  onDoubleClick={() => setPrimaryColor(color.value)}
-                  className={`group relative h-12 rounded-lg border-2 transition-all flex items-center justify-center ${
-                    selectedColor === color.value 
-                      ? 'border-gray-900 scale-105 shadow-md' 
-                      : 'border-transparent hover:scale-105 shadow-sm'
-                  }`}
-                  style={{ backgroundColor: color.value }}
-                  title={`${color.name} (Kliknij dwukrotnie, aby ustawić jako przewodni)`}
-                >
-                  {/* Złota gwiazdka dla koloru przewodniego */}
-                  {primaryColor === color.value && (
-                    <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 drop-shadow-md" />
-                  )}
-                  {/* Subtelny obrys dla białego koloru */}
-                  {color.value === '#FFFFFF' && (
-                    <div className="absolute inset-0 border border-gray-200 rounded-md pointer-events-none" />
-                  )}
-                </button>
-              ))}
-              
+                    key={color.value}
+                    onClick={() => setSelectedColor(color.value)}
+                    onDoubleClick={() => setPrimaryColor(color.value)}
+                    className={`group relative h-12 rounded-lg border-2 transition-all flex items-center justify-center ${
+                      selectedColor === color.value 
+                        ? 'border-gray-900 scale-105 shadow-md' 
+                        : 'border-transparent hover:scale-105 shadow-sm'
+                    }`}
+                    style={{ backgroundColor: color.value }}
+                    title={`${color.name} (Kliknij dwukrotnie, aby ustawić jako przewodni)`}
+                  >
+                    {/* Złota gwiazdka dla koloru przewodniego */}
+                    {primaryColor === color.value && (
+                      <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 drop-shadow-md" />
+                    )}
+                    {/* Subtelny obrys dla białego koloru */}
+                    {color.value === '#FFFFFF' && (
+                      <div className="absolute inset-0 border border-gray-200 rounded-md pointer-events-none" />
+                    )}
+                  </button>
+                ))}
+              </div>
               {/* Wyrenderowane własne kolory */}
-              {customColors.map((color, index) => (
-                <button
-                  key={`custom-${index}`}
-                  onClick={() => setSelectedColor(color)}
-                  onDoubleClick={() => setPrimaryColor(color)}
-                  className={`group relative h-12 rounded-lg border-2 transition-all flex items-center justify-center ${
-                    selectedColor === color 
-                      ? 'border-gray-900 scale-105 shadow-md' 
-                      : 'border-transparent hover:scale-105 shadow-sm'
-                  }`}
-                  style={{ backgroundColor: color }}
-                  title="Własny kolor (Kliknij dwukrotnie, aby ustawić jako przewodni)"
-                >
-                  {/* Złota gwiazdka dla koloru przewodniego (własnego) */}
-                  {primaryColor === color && (
-                    <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 drop-shadow-md" />
-                  )}
-                </button>
-              ))}
-            </div>
+              <h3 className="text-md font-semibold mb-3 flex items-center gap-2">
+                <Palette className="w-4 h-4 text-[#062D34]" />
+                Paleta kolorów projektu
+              </h3>
+              <div className="grid grid-cols-2 gap-3">  
+                {customColors.map((color, index) => (
+                  <button
+                    key={`custom-${index}`}
+                    onClick={() => {
+                      if (isDeleteMode) {
+                        removeCustomColor(color);
+                      } else {
+                        setSelectedColor(color);
+                      }
+                    }}
+                    onDoubleClick={() => setPrimaryColor(color)}
+                    className={`relative h-12 rounded-lg border-2 transition-all flex items-center justify-center 
+                      ${isDeleteMode ? 'ring-2 ring-red-500' : ''}
+                      ${selectedColor === color ? 'border-gray-900 scale-105 shadow-md' : 'border-transparent'}`}
+                    style={{ backgroundColor: color }}
+                    title="Własny kolor (Kliknij dwukrotnie, aby ustawić jako przewodni)"
+                  >
+                    {/* Złota gwiazdka dla koloru przewodniego (własnego) */}
+                    {primaryColor === color && (
+                      <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 drop-shadow-md" />
+                    )}
+                    {isDeleteMode && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                        ×
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            
+
+            <button
+              onClick={() => setIsDeleteMode(!isDeleteMode)}
+              className={`mt-4 w-full text-xs font-medium py-1 px-2 rounded transition-colors 
+                ${isDeleteMode ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}
+            >
+              {isDeleteMode ? 'Zakończ usuwanie' : 'Usuń kolory'}
+            </button>
 
             {/* Formularz dodawania własnego koloru (po zatwierdzeniu) */}
             <div className="mt-4 pt-4 border-t border-gray-100">
