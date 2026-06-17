@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Trash2, Eraser, Palette, Type, MousePointer2, Plus, Link, Eye, Star, Hexagon, Component } from 'lucide-react';
 import { HexColorPicker } from "react-colorful";
 
@@ -27,9 +27,9 @@ const colors = [
   { name: 'Biały', value: '#FFFFFF' }
 ];
 
-// Paleta barw Projektu
+// Paleta barw Projektu (domyślna)
 const custom = [
-  { name: 'International Orange', value: '#FF5722' }, 
+  '#FF5722' // International Orange
 ];
 
 const SimLELogoCreator = () => {
@@ -39,6 +39,7 @@ const SimLELogoCreator = () => {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [font, setFont] = useState<any>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
   
   // Wczytywanie stanu rysunku z URL (Base64) lub w ostateczności z pamięci przeglądarki
   const [paintedTriangles, setPaintedTriangles] = useState<Record<string, string>>(() => {
@@ -65,10 +66,20 @@ const SimLELogoCreator = () => {
       const dataParam = urlParams.get('d');
       if (dataParam) {
          const parsed = JSON.parse(atob(dataParam));
-         if (parsed.colors) return parsed.colors;
+         if (parsed.colors && (parsed.colors.length === 0 || typeof parsed.colors[0] === 'string')) {
+             return parsed.colors;
+         }
       }
       const saved = localStorage.getItem('simle_custom_colors');
-      return saved ? JSON.parse(saved) : custom;
+      if (saved) {
+         const parsed = JSON.parse(saved);
+         // Sprawdzenie, czy w pamięci nie zapisał się stary format z obiektami (np. po poprzedniej wersji)
+         if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] !== 'string') {
+             return custom;
+         }
+         return parsed;
+      }
+      return custom;
     } catch (e) {
       return custom;
     }
@@ -111,6 +122,17 @@ const SimLELogoCreator = () => {
       return '#D4CA05';
     }
   });
+
+  // Obsługa kliknięcia poza pickerem koloru
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+        setShowPicker(false);
+      }
+    };
+    if (showPicker) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showPicker]);
 
   useEffect(() => {
     let isMounted = true;
@@ -264,22 +286,29 @@ const SimLELogoCreator = () => {
   }
 
   const downloadSVG = (type: 'sygnet' | 'logo') => {
+    // 1. Sprawdzamy czy w ogóle mamy co pobrać ZANIM cokolwiek zaczniemy budować
+    const paintedShapes = gridConfig.triangles.filter(t => paintedTriangles[t.id] !== undefined);
+    if (paintedShapes.length === 0) {
+      setToastMessage('Brak elementów do eksportu!');
+      setTimeout(() => setToastMessage(''), 3000);
+      return;
+    }
+
     requestAnimationFrame(() => {
-      const svgElement = document.getElementById(`${type}-visualization`);
+      const container = document.getElementById(`${type}-visualization`);
+      const svgElement = container?.querySelector('svg');
 
       if (!svgElement) {
-        console.error(`Nie znaleziono elementu logo-canvas`);
-        setToastMessage(`Nie znaleziono elementu logo-canvas`);
-      
+        console.error(`Nie znaleziono wygenerowanego pliku SVG dla: ${type}`);
+        setToastMessage(`Wystąpił błąd podczas generowania pliku.`);
         setTimeout(() => setToastMessage(''), 4000);
         return;
       }
       
-      const svgContent = new XMLSerializer().serializeToString(svgElement.childNodes[0]);
+      const svgContent = new XMLSerializer().serializeToString(svgElement);
 
       const svgBlob = new Blob([svgContent.trim()], { type: "image/svg+xml;charset=utf-8" });
       const svgUrl = URL.createObjectURL(svgBlob);
-    
       
       const downloadLink = document.createElement("a");
       downloadLink.href = svgUrl;
@@ -289,18 +318,26 @@ const SimLELogoCreator = () => {
       document.body.removeChild(downloadLink);
 
       setToastMessage(`Pobrano plik: ${downloadFileName(type)}.svg`);
-      
       setTimeout(() => setToastMessage(''), 4000);
       });
   };
 
   const downloadPNG = (type: 'sygnet' | 'logo') => {
-    const svgElement = document.getElementById(`${type}-visualization`);
+    const paintedShapes = gridConfig.triangles.filter(t => paintedTriangles[t.id] !== undefined);
+    if (paintedShapes.length === 0) {
+      setToastMessage('Brak elementów do eksportu!');
+      setTimeout(() => setToastMessage(''), 3000);
+      return;
+    }
+
+    const container = document.getElementById(`${type}-visualization`);
+    const svgElement = container?.querySelector('svg');
+    
     if (!svgElement) return;
 
     // 1. Serializacja SVG
     const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svgElement.childNodes[0]);
+    const svgString = serializer.serializeToString(svgElement);
 
     const viewBox = svgElement.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '500'];
     const width = parseFloat(viewBox[2]);
@@ -320,10 +357,6 @@ const SimLELogoCreator = () => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       
-      // Opcjonalnie: wypełnij tło na biało (SVG często ma przezroczyste tło)
-      // ctx.fillStyle = "#ffffff";
-      // ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
       ctx.drawImage(img, 0, 0, width, height);
 
       // 4. Pobieranie pliku
@@ -336,7 +369,6 @@ const SimLELogoCreator = () => {
       document.body.removeChild(downloadLink);
 
       setToastMessage(`Pobrano plik: ${downloadFileName(type)}.png`);
-      
       setTimeout(() => setToastMessage(''), 4000);
       
       // Sprzątanie
@@ -348,10 +380,17 @@ const SimLELogoCreator = () => {
   const renderSVG = (type: 'sygnet' | 'logo') => {
     const paintedShapes = gridConfig.triangles.filter(t => paintedTriangles[t.id] !== undefined);
     
+    // ZWROT BEZ ZMIANY STANU (usunięto alerty, które powodowały pętlę renderowania)
     if (paintedShapes.length === 0) {
-      setToastMessage('Brak elementów do eksportu!');
-      setTimeout(() => setToastMessage(''), 3000);
-      return "";
+      if (type === 'logo') {
+        return (
+          <div className="text-gray-400 flex flex-col items-center gap-2 py-8 w-full justify-center">
+            <Eye className="w-8 h-8 opacity-50" />
+            <p>Narysuj sygnet, aby zobaczyć wizualizację logo.</p>
+          </div>
+        );
+      }
+      return null;
     }
 
     // Obliczanie obszaru (bounding box) tylko dla pokolorowanych trójkątów
@@ -473,6 +512,7 @@ const SimLELogoCreator = () => {
       return (
         <svg
           viewBox={`0 0 ${totalWidth} ${textBlockHeight}`}
+          className="w-auto max-w-full drop-shadow-sm h-full max-h-32"
         >
           {/* Narysowany Sygnet z wyrównaniem do 0,0 i nałożoną skalą */}
           {sygnet}
@@ -621,7 +661,7 @@ const SimLELogoCreator = () => {
               {/* Formularz dodawania własnego koloru (po zatwierdzeniu) */}
               <div className="mb-4 border-t border-gray-100">
                 <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Nowy kolor</h4>
-                <div className="relative flex flex-col gap-2">
+                <div ref={pickerRef} className="relative flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     {/* Przycisk podglądu otwierający picker */}
                     <button
