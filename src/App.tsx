@@ -783,6 +783,7 @@ const SimLELogoCreator = () => {
                 <Type className="w-4 h-4 text-[#062D34]" />
                 Nazwa projektu
               </h3>
+              <p className=" mb-3 ">Tradycyjnie zaczyna się na "S".</p>
               <input
                 type="text"
                 value={projectName}
