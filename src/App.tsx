@@ -576,7 +576,7 @@ const SimLELogoCreator = () => {
               </button>
             </div>
 
-            <div>
+            <div className="mb-6">
               <h3 className="text-md font-semibold mb-3 flex items-center gap-2">
                 <Palette className="w-4 h-4 text-[#062D34]" />
                 Paleta kolorów SimLE
@@ -606,11 +606,62 @@ const SimLELogoCreator = () => {
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="mb-6">
               {/* Wyrenderowane własne kolory */}
               <h3 className="text-md font-semibold mb-3 flex items-center gap-2">
                 <Palette className="w-4 h-4 text-[#062D34]" />
                 Paleta kolorów projektu
               </h3>
+              {/* Formularz dodawania własnego koloru (po zatwierdzeniu) */}
+              <div className="mb-4 border-t border-gray-100">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Nowy kolor</h4>
+                <div className="relative flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    {/* Przycisk podglądu otwierający picker */}
+                    <button
+                      onClick={() => setShowPicker(!showPicker)}
+                      className="w-10 h-10 rounded border border-gray-200 shadow-sm shrink-0 transition-transform hover:scale-105"
+                      style={{ backgroundColor: tempColor }}
+                    />
+                    
+                    {/* Pole tekstowe HEX */}
+                    <input 
+                      type="text"
+                      value={tempColor}
+                      onChange={(e) => {
+                        const val = e.target.value.toUpperCase();
+                        setTempColor(val.startsWith('#') ? val : `#${val}`);
+                      }}
+                      className="flex-1 px-3 py-2 border border-gray-200 rounded-md font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-[#D4CA05]"
+                      placeholder="#000000"
+                    />
+                  </div>
+
+                  {/* Przycisk dodawania w nowej linii */}
+                  <button
+                    onClick={() => {
+                      if (!customColors.includes(tempColor) && !colors.some(c => c.value === tempColor)) {
+                        setCustomColors(prev => [...prev, tempColor]);
+                      }
+                      setSelectedColor(tempColor);
+                      setShowPicker(false);
+                    }}
+                    className="w-full bg-[#062D34] hover:bg-black text-white px-4 py-2 rounded-md flex items-center justify-center gap-2 transition-colors shadow-sm text-sm font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Dodaj kolor do palety
+                  </button>
+
+                  {/* Pop-up z pickerem */}
+                  {showPicker && (
+                    <div className="absolute top-24 left-0 z-50 p-3 bg-white rounded-xl shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
+                      <HexColorPicker color={tempColor} onChange={setTempColor} />
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">  
                 {customColors.map((color, index) => (
                   <button
@@ -645,61 +696,11 @@ const SimLELogoCreator = () => {
 
             <button
               onClick={() => setIsDeleteMode(!isDeleteMode)}
-              className={`mt-4 w-full text-xs font-medium py-1 px-2 rounded transition-colors 
+              className={`mt-4 w-full px-4 py-2 rounded-md flex items-center justify-center gap-2 transition-colors shadow-sm text-sm font-medium 
                 ${isDeleteMode ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'}`}
             >
               {isDeleteMode ? 'Zakończ usuwanie' : 'Usuń kolory'}
             </button>
-
-            {/* Formularz dodawania własnego koloru (po zatwierdzeniu) */}
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Nowy kolor</h4>
-              
-              <div className="relative flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  {/* Przycisk podglądu otwierający picker */}
-                  <button
-                    onClick={() => setShowPicker(!showPicker)}
-                    className="w-10 h-10 rounded border border-gray-200 shadow-sm shrink-0 transition-transform hover:scale-105"
-                    style={{ backgroundColor: tempColor }}
-                  />
-                  
-                  {/* Pole tekstowe HEX */}
-                  <input 
-                    type="text"
-                    value={tempColor}
-                    onChange={(e) => {
-                      const val = e.target.value.toUpperCase();
-                      setTempColor(val.startsWith('#') ? val : `#${val}`);
-                    }}
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-md font-mono text-sm uppercase focus:outline-none focus:ring-2 focus:ring-[#D4CA05]"
-                    placeholder="#000000"
-                  />
-                </div>
-
-                {/* Przycisk dodawania w nowej linii */}
-                <button
-                  onClick={() => {
-                    if (!customColors.includes(tempColor) && !colors.some(c => c.value === tempColor)) {
-                      setCustomColors(prev => [...prev, tempColor]);
-                    }
-                    setSelectedColor(tempColor);
-                    setShowPicker(false);
-                  }}
-                  className="w-full bg-[#062D34] hover:bg-black text-white px-4 py-2 rounded-md flex items-center justify-center gap-2 transition-colors shadow-sm text-sm font-medium"
-                >
-                  <Plus className="w-4 h-4" />
-                  Dodaj kolor do palety
-                </button>
-
-                {/* Pop-up z pickerem */}
-                {showPicker && (
-                  <div className="absolute top-24 left-0 z-50 p-3 bg-white rounded-xl shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
-                    <HexColorPicker color={tempColor} onChange={setTempColor} />
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
           
           <div className="mt-8 p-4 bg-[#D4CA05]/10 rounded-lg border border-[#D4CA05]/30 text-sm text-[#062D34] flex flex-col gap-3">
