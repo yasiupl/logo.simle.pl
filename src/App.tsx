@@ -257,7 +257,7 @@ const SimLELogoCreator = () => {
         return;
       }
       
-      const svgContent = new XMLSerializer().serializeToString(svgElement);
+      const svgContent = new XMLSerializer().serializeToString(svgElement.childNodes[0]);
 
       const svgBlob = new Blob([svgContent.trim()], { type: "image/svg+xml;charset=utf-8" });
       const svgUrl = URL.createObjectURL(svgBlob);
