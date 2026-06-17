@@ -411,6 +411,80 @@ const SimLELogoCreator = () => {
       });
     });
 
+    // --- ŁĄCZENIE TRÓJKĄTÓW W JEDNOLITE ŚCIEŻKI SVG (UNION PATHS) ---
+    const colorGroups: Record<string, typeof gridConfig.triangles> = {};
+    paintedShapes.forEach(triangle => {
+      const color = paintedTriangles[triangle.id];
+      if (!colorGroups[color]) colorGroups[color] = [];
+      colorGroups[color].push(triangle);
+    });
+
+    // Tworzymy tablicę komponentów JSX zamiast stringa
+    const pathComponents: JSX.Element[] = [];
+
+    for (const [color, triangles] of Object.entries(colorGroups)) {
+      const edges = new Map<{from: string, to: string}, boolean>(); // Mapowanie krawędzi
+
+      // Krok 1: Identyfikacja wszystkich krawędzi (te występujące 2x to wewnętrzne)
+      // Używamy prostego obiektu do zliczania wystąpień krawędzi
+      const edgeCounts: Record<string, number> = {};
+      const edgeData: Record<string, {from: string, to: string}> = {};
+
+      triangles.forEach(t => {
+        const pts = t.points.split(' ');
+        for (let i = 0; i < 3; i++) {
+          const from = pts[i];
+          const to = pts[(i + 1) % 3];
+          const key = `${from}|${to}`;
+          const reverseKey = `${to}|${from}`;
+
+          if (edgeCounts[reverseKey]) {
+            edgeCounts[reverseKey]--; // Krawędź znika (jest wewnętrzna)
+          } else {
+            edgeCounts[key] = (edgeCounts[key] || 0) + 1;
+            edgeData[key] = { from, to };
+          }
+        }
+      });
+
+      // Krok 2: Budowanie ścieżek
+      let colorPaths = '';
+      const availableEdges = new Map(Object.entries(edgeData).filter(([k]) => edgeCounts[k] > 0));
+
+      while (availableEdges.size > 0) {
+        const [firstKey, firstEdge] = availableEdges.entries().next().value!;
+        availableEdges.delete(firstKey);
+
+        let currentPath = `M ${firstEdge.from.replace(',', ' ')} L ${firstEdge.to.replace(',', ' ')}`;
+        let currentTo = firstEdge.to;
+        const startNode = firstEdge.from;
+
+        while (currentTo !== startNode) {
+          let found = false;
+          for (const [key, edge] of availableEdges.entries()) {
+            if (edge.from === currentTo) {
+              currentPath += ` L ${edge.to.replace(',', ' ')}`;
+              currentTo = edge.to;
+              availableEdges.delete(key);
+              found = true;
+              break;
+            }
+          }
+          if (!found) break; 
+        }
+        colorPaths += currentPath + ' Z ';
+      }
+      
+      // Dodajemy gotowy komponent <path> do tablicy
+      pathComponents.push(
+        <path 
+          key={color} 
+          d={colorPaths.trim()} 
+          fill={color}
+        />
+      );
+    }
+
     const sygnetWidth = maxX - minX;
     const sygnetHeight = maxY - minY;
 
@@ -495,15 +569,7 @@ const SimLELogoCreator = () => {
     const sygnet = (
       <g transform={`translate(${marginX}, ${marginY})`}>
           <g transform={`translate(${-minX}, ${-minY})`}>
-              {paintedShapes.map(t => (
-                <polygon 
-                  key={`viz-${t.id}`} 
-                  points={t.points} 
-                  fill={paintedTriangles[t.id]} 
-                  stroke={paintedTriangles[t.id]} 
-                  strokeWidth="1" 
-                />
-              ))}
+              {pathComponents}
           </g>
       </g>
     );
