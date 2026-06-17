@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Konfiguracja dla Single Page Application (SPA)
+# Dzięki temu odświeżanie strony wewnątrz aplikacji nie spowoduje błędu 404
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

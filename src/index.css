@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Science+Gothic:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Ustawienia dla płótna logo */
+  #logo-canvas {
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  /* Estetyczny styl dla przycisków akcji */
+  .btn-action {
+    @apply flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium;
+  }
+
+  /* Stylizacja scrollbara dla kontenerów wizualizacji */
+  .overflow-auto::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .overflow-auto::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded-lg;
+  }
+  
+  .overflow-auto::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors;
+  }
+}

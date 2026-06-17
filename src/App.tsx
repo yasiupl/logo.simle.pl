@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Download, Trash2, Eraser, Palette, MousePointer2, Plus, Link, Eye, Star } from 'lucide-react';
+import { Download, Trash2, Eraser, Palette, MousePointer2, Plus, Link, Eye, Star, Hexagon } from 'lucide-react';
 
 // Wyodrębnione ścieżki wektorowe szarego napisu SimLE z podanego pliku SVG
 const simleTextPaths = [
@@ -474,13 +474,13 @@ const SimLELogoCreator = () => {
                 <Link className="w-4 h-4" />
                 <span className="hidden md:inline">Udostępnij</span>
               </button>
-              <button
+              {/* <button
                 onClick={downloadSvg}
                 className="flex items-center gap-2 px-4 py-2 bg-[#D4CA05] hover:bg-[#b8ae04] text-[#062D34] rounded-md transition-colors text-sm font-bold shadow-sm"
               >
                 <Download className="w-4 h-4" />
                 Pobierz SVG
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -658,6 +658,19 @@ const SimLELogoCreator = () => {
             {renderVisualization()}
           </div>
         </section>
+
+        {/* Przyciski pobierania */}
+        <div className="flex gap-4 justify-center mt-6">
+            <button onClick={downloadSvg} className="flex items-center gap-2 px-6 py-3 bg-[#062D34] text-white rounded-lg hover:bg-black transition">
+                <Hexagon className="w-5 h-5" /> Pobierz Sygnet (SVG)
+            </button>
+            {/* <button onClick={() => downloadFile('sygnet')} className="flex items-center gap-2 px-6 py-3 bg-[#062D34] text-white rounded-lg hover:bg-black transition">
+                <Hexagon className="w-5 h-5" /> Pobierz Sygnet (SVG)
+            </button> */}
+            {/* <button onClick={() => downloadFile('logo')} className="flex items-center gap-2 px-6 py-3 bg-[#D4CA05] text-[#062D34] rounded-lg font-bold hover:bg-[#b8ae04] transition">
+                <Component className="w-5 h-5" /> Pobierz Pełne Logo (SVG)
+            </button> */}
+        </div>
 
       </main>
     </div>
