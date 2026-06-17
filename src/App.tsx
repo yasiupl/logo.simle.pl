@@ -728,13 +728,15 @@ const SimLELogoCreator = () => {
             </h1>
             <p className="text-gray-300 text-sm mt-1 max-w-xl">
               Zaznaczaj trójkąty na siatce, aby stworzyć dynamiczną kompozycję
-              inspirowaną ciągiem Fibonacciego i geometrią, zgodnie z <a 
+              inspirowaną ciągiem Fibonacciego i geometrią, zgodnie z{" "}
+              <a
                 className="underline"
-                href="/SimLE - księga znaku.pdf" 
+                href="/SimLE - księga znaku.pdf"
                 target="_blank"
               >
-                 księgą znaku
-              </a>.
+                księgą znaku
+              </a>
+              .
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
@@ -1050,6 +1052,19 @@ const SimLELogoCreator = () => {
           >
             <Component className="w-5 h-5" /> Pobierz Pełne Logo (PNG)
           </button>
+        </div>
+        <div>
+          <p>
+            Made with ❤️ by{" "}
+            <a href="https://yasiu.pl" target="_blank">
+              yasiu.pl
+            </a>
+            .{" "}
+            <a href="https://github.com/yasiupl/logo.simle.pl" target="_blank">
+              See Source Code
+            </a>
+            .
+          </p>
         </div>
       </main>
     </div>
