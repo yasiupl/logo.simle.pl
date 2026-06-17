@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Trash2, Eraser, Palette, Type, MousePointer2, Plus, Link, Eye, Star, Hexagon, Component } from 'lucide-react';
 import { HexColorPicker } from "react-colorful";
 
@@ -420,11 +420,9 @@ const SimLELogoCreator = () => {
     });
 
     // Tworzymy tablicę komponentów JSX zamiast stringa
-    const pathComponents: JSX.Element[] = [];
+    const pathComponents: React.ReactElement[] = [];
 
     for (const [color, triangles] of Object.entries(colorGroups)) {
-      const edges = new Map<{from: string, to: string}, boolean>(); // Mapowanie krawędzi
-
       // Krok 1: Identyfikacja wszystkich krawędzi (te występujące 2x to wewnętrzne)
       // Używamy prostego obiektu do zliczania wystąpień krawędzi
       const edgeCounts: Record<string, number> = {};
