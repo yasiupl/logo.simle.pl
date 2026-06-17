@@ -768,7 +768,7 @@ const SimLELogoCreator = () => {
         <div className="flex flex-col lg:flex-row gap-6 h-fit">
           {/* Pasek Narzędzi */}
           <aside className="w-full lg:w-64 bg-white p-5 rounded-xl shadow-sm border border-gray-200 h-fit shrink-0">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6 flex items-center gap-2">
               Narzędzia
             </h2>
             <div className="mb-6">
@@ -935,23 +935,13 @@ const SimLELogoCreator = () => {
                 {isDeleteMode ? "Zakończ usuwanie" : "Usuń kolory"}
               </button>
             </div>
-
-            <div className="mt-8 p-4 bg-[#D4CA05]/10 rounded-lg border border-[#D4CA05]/30 text-sm text-[#062D34] flex flex-col gap-3">
-              <p>
-                <strong>Wskazówka 1:</strong> Przytrzymaj lewy przycisk myszy i
-                przeciągnij po siatce, aby szybko zamalować wiele trójkątów na
-                raz.
-              </p>
-              <p>
-                <strong>Wskazówka 2:</strong> Kliknij dwukrotnie na kolor w
-                palecie, aby ustawić go jako kolor przewodni (oznaczony złotą
-                gwiazdką). Zmieni to kolor nazwy projektu w wizualizacji.
-              </p>
-            </div>
           </aside>
 
           {/* Obszar Roboczy */}
-          <section className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex items-center justify-center p-4">
+          <section className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-center p-4">
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+              Obszar roboczy
+            </h2>
             <div className="overflow-auto max-w-full max-h-full">
               <svg
                 id="logo-canvas"
@@ -995,6 +985,18 @@ const SimLELogoCreator = () => {
                   );
                 })}
               </svg>
+            </div>
+            <div className="mt-8 p-4 bg-[#D4CA05]/10 rounded-lg border border-[#D4CA05]/30 text-sm text-[#062D34] flex flex-row gap-3">
+              <p>
+                <strong>Wskazówka 1:</strong> Przytrzymaj lewy przycisk myszy i
+                przeciągnij po siatce, aby szybko zamalować wiele trójkątów na
+                raz.
+              </p>
+              <p>
+                <strong>Wskazówka 2:</strong> Kliknij dwukrotnie na kolor w
+                palecie, aby ustawić go jako kolor przewodni (oznaczony złotą
+                gwiazdką). Zmieni to kolor nazwy projektu w wizualizacji.
+              </p>
             </div>
           </section>
         </div>
