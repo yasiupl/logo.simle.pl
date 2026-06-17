@@ -340,8 +340,14 @@ const SimLELogoCreator = () => {
     const svgString = serializer.serializeToString(svgElement);
 
     const viewBox = svgElement.getAttribute('viewBox')?.split(' ') || ['0', '0', '1000', '500'];
-    const width = parseFloat(viewBox[2]);
-    const height = parseFloat(viewBox[3]);
+    const originalWidth = parseFloat(viewBox[2]);
+    const originalHeight = parseFloat(viewBox[3]);
+    
+    // Minimalna wysokość 1080px
+    const minHeight = 1080;
+    const scale = minHeight / originalHeight;
+    const width = originalWidth * scale;
+    const height = minHeight;
     
     // 2. Utworzenie obiektu Blob i URL dla obrazu
     const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
