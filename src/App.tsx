@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Trash2, Eraser, Palette, Type, MousePointer2, Plus, Link, Eye, Star, Hexagon, Component } from 'lucide-react';
 import { HexColorPicker } from "react-colorful";
 
-// Wyodrębnione ścieżki wektorowe szarego napisu SimLE z podanego pliku SVG
+// Szary napis SimLE
 const simleTextPaths = [
   { transform: "translate(417.032,309.6913)", d: "M 0,0 H -30.989 V -8.886 H 3.845 v -23.731 h -45.342 l 3.846,6.662 h 34.835 v 10.407 H -37.651 V 6.661 H 3.845 Z" },
   { transform: "translate(438.8967,308.9808)", d: "M 0,0 -3.846,0.001 Z" },
@@ -15,8 +15,25 @@ const simleTextPaths = [
   { transform: "translate(462.5465,287.0942)", d: "M 0,0 -3.797,-6.577" }
 ];
 
+// Paleta barw SimLE
+const colors = [
+  { name: 'Oliwkowy', value: '#D4CA05' }, 
+  { name: 'Ciemnozielony', value: '#3B6329' }, 
+  { name: 'Morski', value: '#2B7A87' }, 
+  { name: 'Ciemny Morski', value: '#062D34' },
+  { name: 'Szary (Podany)', value: '#D4D3D3' }, 
+  { name: 'Ciemny Szary', value: '#58595B' },
+  { name: 'Czarny', value: '#000000' },
+  { name: 'Biały', value: '#FFFFFF' }
+];
+
+// Paleta barw Projektu
+const custom = [
+  { name: 'International Orange', value: '#FF5722' }, 
+];
+
 const SimLELogoCreator = () => {
-  const [selectedColor, setSelectedColor] = useState<string | null>('#F58220');
+  const [selectedColor, setSelectedColor] = useState<string | null>('#D4CA05');
   const [tempColor, setTempColor] = useState('#000000');
   const [showPicker, setShowPicker] = useState(false);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
@@ -51,16 +68,16 @@ const SimLELogoCreator = () => {
          if (parsed.colors) return parsed.colors;
       }
       const saved = localStorage.getItem('simle_custom_colors');
-      return saved ? JSON.parse(saved) : [];
+      return saved ? JSON.parse(saved) : custom;
     } catch (e) {
-      return [];
+      return custom;
     }
   });
   
   const removeCustomColor = (colorToRemove: string) => {
     setCustomColors(prev => prev.filter(c => c !== colorToRemove));
     // Jeśli usuwamy aktualnie wybrany kolor, zresetuj go
-    if (selectedColor === colorToRemove) setSelectedColor('#F58220');
+    if (selectedColor === colorToRemove) setSelectedColor('#D4CA05');
   };
 
   // Wczytywanie nazwy projektu
@@ -89,9 +106,9 @@ const SimLELogoCreator = () => {
          if (parsed.primaryColor) return parsed.primaryColor;
       }
       const saved = localStorage.getItem('simle_primary_color');
-      return saved ? saved : '#F58220'; 
+      return saved ? saved : '#D4CA05'; 
     } catch (e) {
-      return '#F58220';
+      return '#D4CA05';
     }
   });
 
@@ -158,18 +175,6 @@ const SimLELogoCreator = () => {
       console.error("Błąd kodowania adresu URL", e);
     }
   }, [paintedTriangles, customColors, projectName, primaryColor]);
-
-  // Paleta barw
-  const colors = [
-    { name: 'Oliwkowy', value: '#D4CA05' }, 
-    { name: 'Ciemnozielony', value: '#3B6329' }, 
-    { name: 'Morski', value: '#2B7A87' }, 
-    { name: 'Ciemny Morski', value: '#062D34' },
-    { name: 'Szary (Podany)', value: '#D4D3D3' }, 
-    { name: 'Ciemny Szary', value: '#58595B' },
-    { name: 'Czarny', value: '#000000' },
-    { name: 'Biały', value: '#FFFFFF' }
-  ];
 
   // Konfiguracja siatki trójkątów (szablonu)
   const gridConfig = useMemo(() => {
@@ -772,20 +777,16 @@ const SimLELogoCreator = () => {
                 <Hexagon className="w-5 h-5" /> Pobierz Sygnet (SVG)
             </button>
             <button 
-              onClick={() => downloadSVG('logo')} 
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-[#062D34] text-white rounded-lg font-semibold hover:bg-black transition shadow-sm"
-            >
-                <Component className="w-5 h-5" /> Pobierz Pełne Logo (SVG)
-            </button>
-        </div>
-
-        {/* Przyciski pobierania PNG*/}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-2 mb-8">
-            <button 
               onClick={() => downloadPNG('sygnet')} 
               className="flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-[#062D34] text-[#062D34] rounded-lg font-semibold hover:bg-gray-50 transition shadow-sm"
             >
                 <Hexagon className="w-5 h-5" /> Pobierz Sygnet (PNG)
+            </button>
+            <button 
+              onClick={() => downloadSVG('logo')} 
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-[#062D34] text-white rounded-lg font-semibold hover:bg-black transition shadow-sm"
+            >
+                <Component className="w-5 h-5" /> Pobierz Pełne Logo (SVG)
             </button>
             <button 
               onClick={() => downloadPNG('logo')} 
@@ -794,7 +795,6 @@ const SimLELogoCreator = () => {
                 <Component className="w-5 h-5" /> Pobierz Pełne Logo (PNG)
             </button>
         </div>
-
       </main>
     </div>
   );
