@@ -951,13 +951,13 @@ const SimLELogoCreator = () => {
               Obszar roboczy
             </h2>
             <p className="mb-6">Narysuj sygnet twojego projektu poniżej.</p>
-            <div className="overflow-auto max-w-full max-h-full justify-center">
+            <div className="overflow-auto max-w-full max-h-full flex justify-center">
               <svg
                 id="logo-canvas"
                 width={gridConfig.width}
                 height={gridConfig.height}
                 viewBox={`0 0 ${gridConfig.width} ${gridConfig.height}`}
-                className="bg-transparent touch-none cursor-crosshair"
+                className="bg-transparent touch-none cursor-crosshair mx-auto"
                 style={{
                   minWidth: gridConfig.width,
                   minHeight: gridConfig.height,
