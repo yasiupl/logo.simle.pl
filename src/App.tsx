@@ -20,7 +20,11 @@ import {
 } from "lucide-react";
 import { HexColorPicker } from "react-colorful";
 
-// Szary napis SimLE
+/**
+ * Ścieżki wektorowe dla napisu "SimLE".
+ * Każdy obiekt zawiera transformację oraz definicję ścieżki SVG (d).
+ * Napis ten jest częścią wizualizacji pełnego logo.
+ */
 const simleTextPaths = [
   {
     transform: "translate(417.032,309.6913)",
@@ -48,7 +52,10 @@ const simleTextPaths = [
   { transform: "translate(462.5465,287.0942)", d: "M 0,0 -3.797,-6.577" },
 ];
 
-// Paleta barw SimLE
+/**
+ * Oficjalna paleta barw SimLE.
+ * Używana jako domyślny wybór dla użytkownika.
+ */
 const colors = [
   { name: "Oliwkowy", value: "#D4CA05" },
   { name: "Ciemnozielony", value: "#3B6329" },
@@ -60,11 +67,17 @@ const colors = [
   { name: "Biały", value: "#FFFFFF" },
 ];
 
-// Paleta barw Projektu (domyślna)
+/**
+ * Domyślna paleta barw dla projektów (dodatkowe kolory).
+ */
 const custom = [
   "#FF5722", // International Orange
 ];
 
+/**
+ * Główny komponent aplikacji Kreator Logo SimLE.
+ * Zarządza stanem rysunku, kolorami, nazwą projektu oraz generowaniem wizualizacji.
+ */
 const SimLELogoCreator = () => {
   const [selectedColor, setSelectedColor] = useState<string | null>("#D4CA05");
   const [tempColor, setTempColor] = useState("#000000");
@@ -74,7 +87,12 @@ const SimLELogoCreator = () => {
   const [font, setFont] = useState<any>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
 
-  // Wczytywanie stanu rysunku z URL (Base64) lub w ostateczności z pamięci przeglądarki
+  /**
+   * Stan pokolorowanych trójkątów.
+   * Kluczem jest ID trójkąta (wiersz-kolumna), a wartością kolor w formacie HEX.
+   * Inicjalizacja próbuje odczytać dane z parametru 'd' w URL (Base64),
+   * a jeśli go nie ma, to z localStorage.
+   */
   const [paintedTriangles, setPaintedTriangles] = useState<
     Record<string, string>
   >(() => {
@@ -87,14 +105,17 @@ const SimLELogoCreator = () => {
       }
       const saved = localStorage.getItem("simle_painted_triangles");
       return saved ? JSON.parse(saved) : {};
-    } catch (e) {
+    } catch {
       return {};
     }
   });
 
   const [isDrawing, setIsDrawing] = useState(false);
 
-  // Wczytywanie własnych kolorów z URL (Base64) lub w ostateczności z pamięci przeglądarki
+  /**
+   * Stan własnych kolorów dodanych przez użytkownika.
+   * Mechanizm wczytywania analogiczny do paintedTriangles.
+   */
   const [customColors, setCustomColors] = useState<string[]>(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -122,7 +143,7 @@ const SimLELogoCreator = () => {
         return parsed;
       }
       return custom;
-    } catch (e) {
+    } catch {
       return custom;
     }
   });
@@ -133,7 +154,9 @@ const SimLELogoCreator = () => {
     if (selectedColor === colorToRemove) setSelectedColor("#D4CA05");
   };
 
-  // Wczytywanie nazwy projektu
+  /**
+   * Nazwa projektu, która pojawia się w pełnym logo pod napisem SimLE.
+   */
   const [projectName, setProjectName] = useState(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -144,12 +167,14 @@ const SimLELogoCreator = () => {
       }
       const saved = localStorage.getItem("simle_project_name");
       return saved ? saved : "Projekt";
-    } catch (e) {
+    } catch {
       return "Projekt";
     }
   });
 
-  // Wczytywanie koloru przewodniego (do nazwy w wizualizacji)
+  /**
+   * Kolor przewodni projektu, używany do renderowania nazwy projektu w wizualizacji.
+   */
   const [primaryColor, setPrimaryColor] = useState(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -160,12 +185,14 @@ const SimLELogoCreator = () => {
       }
       const saved = localStorage.getItem("simle_primary_color");
       return saved ? saved : "#D4CA05";
-    } catch (e) {
+    } catch {
       return "#D4CA05";
     }
   });
 
-  // Obsługa kliknięcia poza pickerem koloru
+  /**
+   * Efekt zamykający picker koloru po kliknięciu poza jego obszarem.
+   */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -179,6 +206,10 @@ const SimLELogoCreator = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showPicker]);
 
+  /**
+   * Efekt odpowiedzialny za ładowanie biblioteki opentype.js oraz czcionki Science Gothic.
+   * Czcionka wektorowa jest niezbędna do renderowania nazwy projektu jako ścieżek SVG (do eksportu).
+   */
   useEffect(() => {
     let isMounted = true;
 
@@ -231,7 +262,10 @@ const SimLELogoCreator = () => {
     };
   }, []);
 
-  // Efekt zapisujący stan w localStorage oraz kodujący go do Base64 w pasku adresu
+  /**
+   * Efekt synchronizujący stan aplikacji z localStorage oraz paskiem adresu (URL).
+   * Pozwala na trwałe przechowywanie projektu oraz łatwe udostępnianie go przez link.
+   */
   useEffect(() => {
     localStorage.setItem(
       "simle_painted_triangles",
@@ -257,7 +291,11 @@ const SimLELogoCreator = () => {
     }
   }, [paintedTriangles, customColors, projectName, primaryColor]);
 
-  // Konfiguracja siatki trójkątów (szablonu)
+  /**
+   * Generuje siatkę trójkątów stanowiącą płótno do rysowania.
+   * Trójkąty są ułożone w rzędach, naprzemiennie skierowane w górę i w dół.
+   * Każdy trójkąt ma unikalne ID oparte na jego położeniu w siatce.
+   */
   const gridConfig = useMemo(() => {
     const side = 40; // Długość boku trójkąta
     const h = (side * Math.sqrt(3)) / 2; // Wysokość trójkąta
@@ -271,8 +309,8 @@ const SimLELogoCreator = () => {
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        let x = (c * side) / 2;
-        let y = r * h;
+        const x = (c * side) / 2;
+        const y = r * h;
 
         // Funkcja formatująca punkty do stałej dokładności - niezbędne dla
         // perfekcyjnego łączenia wierzchołków i usuwania problemów z precyzją JS
@@ -308,6 +346,10 @@ const SimLELogoCreator = () => {
     return () => window.removeEventListener("mouseup", handleMouseUp);
   }, []);
 
+  /**
+   * Obsługuje interakcję z pojedynczym trójkątem (kliknięcie lub przeciągnięcie myszą).
+   * Zmienia kolor trójkąta na wybrany lub usuwa go, jeśli aktywna jest gumka.
+   */
   const handleTriangleInteraction = useCallback(
     (id: string) => {
       setPaintedTriangles((prev) => {
@@ -350,6 +392,10 @@ const SimLELogoCreator = () => {
     return `SimLE_${typeName}_${safeProjectName}_${dateStr}`;
   };
 
+  /**
+   * Funkcja eksportująca wygenerowaną wizualizację do formatu SVG.
+   * Pobiera zawartość elementu SVG z DOM i tworzy z niej plik do pobrania.
+   */
   const downloadSVG = (type: "sygnet" | "logo") => {
     // 1. Sprawdzamy czy w ogóle mamy co pobrać ZANIM cokolwiek zaczniemy budować
     const paintedShapes = gridConfig.triangles.filter(
@@ -391,6 +437,10 @@ const SimLELogoCreator = () => {
     });
   };
 
+  /**
+   * Funkcja eksportująca wygenerowaną wizualizację do formatu PNG.
+   * Renderuje SVG na ukrytym elemencie Canvas, skalując go do wysokiej rozdzielczości (min. 1080px wysokości).
+   */
   const downloadPNG = (type: "sygnet" | "logo") => {
     const paintedShapes = gridConfig.triangles.filter(
       (t) => paintedTriangles[t.id] !== undefined,
@@ -461,6 +511,11 @@ const SimLELogoCreator = () => {
     img.src = url;
   };
 
+  /**
+   * Główna funkcja renderująca komponenty SVG (Sygnet lub Pełne Logo).
+   * Zawiera skomplikowaną logikę łączenia sąsiadujących trójkątów w jednolite ścieżki (Union Paths),
+   * co zapobiega powstawaniu luk między elementami i optymalizuje strukturę pliku SVG.
+   */
   const renderSVG = (type: "sygnet" | "logo") => {
     const paintedShapes = gridConfig.triangles.filter(
       (t) => paintedTriangles[t.id] !== undefined,
@@ -494,7 +549,12 @@ const SimLELogoCreator = () => {
       });
     });
 
-    // --- ŁĄCZENIE TRÓJKĄTÓW W JEDNOLITE ŚCIEŻKI SVG (UNION PATHS) ---
+    /**
+     * Algorytm łączenia trójkątów (Union Paths):
+     * 1. Grupuje trójkąty według koloru.
+     * 2. Dla każdej grupy identyfikuje krawędzie, które występują tylko raz (krawędzie zewnętrzne).
+     * 3. Buduje ciągłe ścieżki z zewnętrznych krawędzi, tworząc jednolite wielokąty.
+     */
     const colorGroups: Record<string, typeof gridConfig.triangles> = {};
     paintedShapes.forEach((triangle) => {
       const color = paintedTriangles[triangle.id];
@@ -604,7 +664,7 @@ const SimLELogoCreator = () => {
 
       if (font) {
         let vectorPaths = "";
-        let currentX = 0;
+        let currentX;
         const letterSpacePx = actualFontSize * 0.05;
 
         try {
