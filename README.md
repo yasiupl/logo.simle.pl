@@ -15,26 +15,16 @@ Aby uruchomić projekt, upewnij się, że masz zainstalowane na swoim komputerze
 1. **Sklonuj repozytorium** (lub pobierz pliki projektu).  
 2. **Zainstaluj zależności**:  
    Otwórz terminal w folderze projektu i wpisz:  
+   ```
    npm install
+   ```
 
-3. **Uruchom projekt w trybie deweloperskim**:  
+4. **Uruchom projekt w trybie deweloperskim**:  
+   ```
    npm run dev
-
+   ```
+   
    Aplikacja będzie dostępna pod adresem http://localhost:5173 (lub innym wskazanym w terminalu).
-
-## **Użycie plików .tsx**
-
-Twój główny plik App.tsx jest punktem wejścia komponentu. Aby poprawnie korzystać z TypeScript w React:
-
-* **Typowanie**: TypeScript wymusza określenie typów dla stanów i propsów. Przykład:  
-  interface AppProps {  
-    initialColor?: string;  
-  }  
-  const App: React.FC\<AppProps\> \= ({ initialColor \= '\#000' }) \=\> { ... }
-
-* **Struktura**: Upewnij się, że w pliku index.html lub main.tsx znajduje się odpowiedni punkt montowania:  
-  const root \= ReactDOM.createRoot(document.getElementById('root') as HTMLElement);  
-  root.render(\<App /\>);
 
 ## **Funkcjonalności**
 
@@ -46,4 +36,6 @@ Twój główny plik App.tsx jest punktem wejścia komponentu. Aby poprawnie korz
 ## **Budowanie aplikacji (dla produkcji)**
 
 Aby wygenerować zoptymalizowaną wersję aplikacji do umieszczenia na serwerze:  
+```
 npm run build  
+```
